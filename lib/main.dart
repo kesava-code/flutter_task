@@ -7,27 +7,47 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_task/app_config/router/app_router.dart';
+import 'package:flutter_task/features/4_settings/cubit/settings_cubit.dart';
+import 'package:flutter_task/features/4_settings/data/language_service.dart';
+import 'package:flutter_task/l10n/app_localizations.dart';
 import 'firebase_options.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   final authRepository = AuthRepositoryImpl();
-  runApp(MyApp(authRepository: authRepository));
+  final languageService = LanguageService();
+
+  runApp(MyApp(
+    authRepository: authRepository,
+    languageService: languageService,
+  ));
 }
 
 class MyApp extends StatelessWidget {
   final AuthRepository _authRepository;
-  const MyApp({super.key, required AuthRepository authRepository})
-    : _authRepository = authRepository;
+  final LanguageService _languageService;
+  const MyApp({
+    super.key,
+    required AuthRepository authRepository,
+    required LanguageService languageService,
+  })  : _authRepository = authRepository,
+        _languageService = languageService;
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider<AuthRepository>.value(
-      value: _authRepository,
-      child: BlocProvider(
-        create: (context) => AuthBloc(authRepository: _authRepository),
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider.value(value: _authRepository),
+        RepositoryProvider.value(value: _languageService),
+      ],
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => AuthBloc(authRepository: _authRepository)),
+          BlocProvider(create: (_) => SettingsCubit(_languageService)..loadInitialLanguage()),
+        ],
         child: const AppView(),
       ),
     );
@@ -41,10 +61,15 @@ class AppView extends StatelessWidget {
   Widget build(BuildContext context) {
     final authBloc = context.watch<AuthBloc>();
     final appRouter = AppRouter(authBloc: authBloc);
+    final locale = context.watch<SettingsCubit>().state;
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-       theme: AppTheme.lightTheme,
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
+      locale: locale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
       routerConfig: appRouter.router,

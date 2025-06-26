@@ -1,6 +1,9 @@
 // File: lib/core/widgets/main_app_shell.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_task/features/0_auth/bloc/auth_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_task/l10n/app_localizations.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MainAppShell extends StatelessWidget {
   final Widget child;
@@ -38,6 +41,8 @@ class MainAppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     // We use LayoutBuilder to determine if we should show a rail or a bar
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -45,10 +50,10 @@ class MainAppShell extends StatelessWidget {
         if (constraints.maxWidth > 600) {
           return Scaffold(
             appBar: AppBar(
-              title: const Text('Flutter Task'),
+              title: Text(l10n.appTitle),
               actions: [
-                IconButton(icon: const Icon(Icons.qr_code_scanner), onPressed: () { /* TODO */ }),
-                IconButton(icon: const Icon(Icons.settings), onPressed: () => context.go('/settings')),
+                IconButton(icon: const Icon(Icons.qr_code_scanner), tooltip: 'Scan QR', onPressed: () { /* TODO */ }),
+                IconButton(icon: const Icon(Icons.settings), tooltip: l10n.settings, onPressed: () => context.go('/settings')),
               ],
             ),
             body: Row(
@@ -57,10 +62,10 @@ class MainAppShell extends StatelessWidget {
                   selectedIndex: _calculateSelectedIndex(context),
                   onDestinationSelected: (index) => _onTap(index, context),
                   labelType: NavigationRailLabelType.all,
-                  destinations: const <NavigationRailDestination>[
-                    NavigationRailDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: Text('Home')),
-                    NavigationRailDestination(icon: Icon(Icons.chat_bubble_outline), selectedIcon: Icon(Icons.chat_bubble), label: Text('Chats')),
-                    NavigationRailDestination(icon: Icon(Icons.map_outlined), selectedIcon: Icon(Icons.map), label: Text('Map')),
+                  destinations: <NavigationRailDestination>[
+                    NavigationRailDestination(icon: const Icon(Icons.home_outlined), selectedIcon: const Icon(Icons.home), label: Text(l10n.home)),
+                    NavigationRailDestination(icon: const Icon(Icons.chat_bubble_outline), selectedIcon: const Icon(Icons.chat_bubble), label: Text(l10n.chats)),
+                    NavigationRailDestination(icon: const Icon(Icons.map_outlined), selectedIcon: const Icon(Icons.map), label: Text(l10n.map)),
                   ],
                 ),
                 const VerticalDivider(thickness: 1, width: 1),
@@ -72,20 +77,20 @@ class MainAppShell extends StatelessWidget {
         // Otherwise, show a BottomNavigationBar (for mobile)
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Flutter Task'),
+            title: Text(l10n.appTitle),
             actions: [
-                IconButton(icon: const Icon(Icons.qr_code_scanner), onPressed: () { /* TODO */ }),
-                IconButton(icon: const Icon(Icons.settings), onPressed: () => context.go('/settings')),
+                IconButton(icon: const Icon(Icons.qr_code_scanner), tooltip: 'Scan QR', onPressed: () { /* TODO */ }),
+                IconButton(icon: const Icon(Icons.settings), tooltip: l10n.settings, onPressed: () => context.go('/settings')),
             ],
           ),
           body: child, // The main content area
           bottomNavigationBar: BottomNavigationBar(
             currentIndex: _calculateSelectedIndex(context),
             onTap: (index) => _onTap(index, context),
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-              BottomNavigationBarItem(icon: Icon(Icons.chat_bubble), label: 'Chats'),
-              BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(icon: const Icon(Icons.home), label: l10n.home),
+              BottomNavigationBarItem(icon: const Icon(Icons.chat_bubble), label: l10n.chats),
+              BottomNavigationBarItem(icon: const Icon(Icons.map), label: l10n.map),
             ],
           ),
         );

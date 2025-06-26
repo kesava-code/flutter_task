@@ -1,0 +1,12 @@
+{
+  "@@locale": "ar",
+  "appTitle": "مهمة فلاتر",
+  "welcome": "أهلاً بك",
+  "home": "الرئيسية",
+  "chats": "المحادثات",
+  "map": "الخريطة",
+  "settings": "الإعدادات",
+  "scanThisCodeToConnect": "امسح هذا الرمز للتواصل",
+  "changeLanguage": "تغيير اللغة",
+  "logout": "تسجيل الخروج"
+}

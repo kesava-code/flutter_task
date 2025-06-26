@@ -1,0 +1,12 @@
+{
+  "@@locale": "en",
+  "appTitle": "Flutter Task",
+  "welcome": "Welcome",
+  "home": "Home",
+  "chats": "Chats",
+  "map": "Map",
+  "settings": "Settings",
+  "scanThisCodeToConnect": "Scan this code to connect",
+  "changeLanguage": "Change Language",
+  "logout": "Logout"
+}
