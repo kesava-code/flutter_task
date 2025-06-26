@@ -194,7 +194,6 @@ class _SignUpFormState extends State<SignUpForm> {
                                 onPressed: null,
                                 child: Center(
                                   child: CircularProgressIndicator(
-                                    
                                     color: Theme.of(
                                       context,
                                     ).colorScheme.onPrimary,
@@ -202,14 +201,6 @@ class _SignUpFormState extends State<SignUpForm> {
                                 ),
                               )
                             : ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
                                 onPressed: isButtonEnabled
                                     ? () {
                                         if (_formKey.currentState!.validate()) {

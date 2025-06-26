@@ -46,6 +46,7 @@ dependencies:
   flutter_bloc: ^9.1.1
   qr_flutter: ^4.1.0
   shared_preferences: ^2.5.3
+  mobile_scanner: ^7.0.1
   
 
 dev_dependencies:

@@ -12,6 +12,8 @@ import 'package:flutter_task/features/4_settings/presentation/pages/settings_scr
 import 'package:go_router/go_router.dart';
 import 'package:flutter_task/features/0_auth/presentation/pages/login_page.dart';
 import 'package:flutter_task/features/0_auth/presentation/pages/registration_page.dart';
+import 'package:flutter_task/features/2_chat/presentation/pages/chat_detail_screen.dart';
+import 'package:flutter_task/features/5_qr_scanner/presentation/pages/qr_scanner_screen.dart';
 
 class AppRouter {
   final AuthBloc authBloc;
@@ -25,7 +27,9 @@ class AppRouter {
       refreshListenable: _GoRouterRefreshStream(authBloc.stream),
       redirect: (BuildContext context, GoRouterState state) {
         final bool loggedIn = authBloc.state.status == AuthStatus.authenticated;
-        final bool isLoggingIn = state.matchedLocation == '/login' || state.matchedLocation == '/register';
+        final bool isLoggingIn =
+            state.matchedLocation == '/login' ||
+            state.matchedLocation == '/register';
 
         // If not logged in and not on a login/register page, redirect to login
         if (!loggedIn && !isLoggingIn) {
@@ -41,15 +45,22 @@ class AppRouter {
       routes: <RouteBase>[
         GoRoute(
           path: '/login',
-          builder: (BuildContext context, GoRouterState state) => const LoginPage(),
+          builder: (BuildContext context, GoRouterState state) =>
+              const LoginPage(),
         ),
         GoRoute(
           path: '/register',
-          builder: (BuildContext context, GoRouterState state) => const RegistrationPage(),
+          builder: (BuildContext context, GoRouterState state) =>
+              const RegistrationPage(),
         ),
-         GoRoute(
+        GoRoute(
           path: '/settings',
-          builder: (BuildContext context, GoRouterState state) => const SettingsScreen(),
+          builder: (BuildContext context, GoRouterState state) =>
+              const SettingsScreen(),
+        ),
+        GoRoute(
+          path: '/scanner',
+          builder: (context, state) => const QrScannerScreen(),
         ),
         // This StatefulShellRoute is the main UI for logged-in users
         StatefulShellRoute.indexedStack(
@@ -60,24 +71,45 @@ class AppRouter {
           branches: [
             // Branch for the 'Home' tab
             StatefulShellBranch(
-              routes: [GoRoute(path: '/home', builder: (context, state) => const HomeScreen())],
+              routes: [
+                GoRoute(
+                  path: '/home',
+                  builder: (context, state) => const HomeScreen(),
+                ),
+              ],
             ),
             // Branch for the 'Chats' tab
             StatefulShellBranch(
-              routes: [GoRoute(path: '/chats', builder: (context, state) => const ChatsScreen())],
+              routes: [
+                GoRoute(
+                  path: '/chats',
+                  builder: (context, state) => const ChatsScreen(),
+                  routes: [
+                    GoRoute(
+                      path: ':chatId', // e.g., /chats/user1_user2
+                      builder: (context, state) {
+                        final chatId = state.pathParameters['chatId']!;
+                        return ChatDetailScreen(chatId: chatId);
+                      },
+                    ),
+                  ],
+                ),
+              ],
             ),
             // Branch for the 'Map' tab
             StatefulShellBranch(
-              routes: [GoRoute(path: '/map', builder: (context, state) => const MapScreen())],
+              routes: [
+                GoRoute(
+                  path: '/map',
+                  builder: (context, state) => const MapScreen(),
+                ),
+              ],
             ),
           ],
         ),
       ],
-      errorBuilder: (context, state) => Scaffold(
-        body: Center(
-          child: Text('Page not found: ${state.error}'),
-        ),
-      ),
+      errorBuilder: (context, state) =>
+          Scaffold(body: Center(child: Text('Page not found: ${state.error}'))),
     );
     return _router!;
   }

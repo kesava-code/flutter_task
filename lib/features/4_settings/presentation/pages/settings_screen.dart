@@ -4,8 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_task/features/0_auth/bloc/auth_bloc.dart';
 import 'package:flutter_task/features/0_auth/bloc/auth_event.dart';
 import 'package:flutter_task/features/4_settings/cubit/settings_cubit.dart';
-
 import 'package:flutter_task/l10n/app_localizations.dart';
+import 'package:go_router/go_router.dart';
+
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -14,6 +15,16 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.settings),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/home');
+            }
+          },
+        ),
       ),
       body: ListView(
         children: [
