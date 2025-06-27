@@ -1,4 +1,3 @@
-// File: lib/features/2_chat/bloc/chat_detail/chat_detail_event.dart
 part of 'chat_detail_bloc.dart';
 
 abstract class ChatDetailEvent extends Equatable {
@@ -21,3 +20,5 @@ class _MessagesUpdated extends ChatDetailEvent {
    @override
   List<Object> get props => [messages];
 }
+
+class ChatOpened extends ChatDetailEvent {}

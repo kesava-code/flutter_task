@@ -17,6 +17,10 @@ class ChatDetailBloc extends Bloc<ChatDetailEvent, ChatDetailState> {
       : super(const ChatDetailState()) {
     on<MessageSent>(_onMessageSent);
     on<_MessagesUpdated>(_onMessagesUpdated);
+    on<ChatOpened>(_onChatOpened);
+
+    // Trigger the initial "mark as seen" when the chat is first opened.
+    add(ChatOpened());
 
     _messagesSubscription = _chatRepository.getMessages(chatId).listen((messages) {
       add(_MessagesUpdated(messages));
@@ -30,10 +34,15 @@ class ChatDetailBloc extends Bloc<ChatDetailEvent, ChatDetailState> {
   }
 
   void _onMessagesUpdated(_MessagesUpdated event, Emitter<ChatDetailState> emit) {
-    // **THE FIX IS HERE:**
     // Every time new messages arrive, we try to mark them as seen.
+    // This ensures that if the user is already on the screen, the status updates live.
     _chatRepository.markMessagesAsSeen(chatId);
     emit(state.copyWith(status: ChatDetailStatus.success, messages: event.messages));
+  }
+
+  void _onChatOpened(ChatOpened event, Emitter<ChatDetailState> emit) async {
+    // This is also called once when the chat screen is opened to clear any existing unread messages.
+    await _chatRepository.markMessagesAsSeen(chatId);
   }
 
   @override

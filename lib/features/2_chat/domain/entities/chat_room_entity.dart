@@ -7,6 +7,7 @@ class ChatRoomEntity extends Equatable {
   final String partnerUid;
   final String lastMessage;
   final DateTime lastMessageTimestamp;
+  final int unreadCount; // Add unread count
 
   const ChatRoomEntity({
     required this.id,
@@ -14,8 +15,9 @@ class ChatRoomEntity extends Equatable {
     required this.partnerUid,
     required this.lastMessage,
     required this.lastMessageTimestamp,
+    required this.unreadCount,
   });
 
   @override
-  List<Object?> get props => [id, partnerName, partnerUid, lastMessage, lastMessageTimestamp];
+  List<Object?> get props => [id, partnerName, partnerUid, lastMessage, lastMessageTimestamp, unreadCount];
 }

@@ -5,6 +5,7 @@ import 'package:flutter_task/features/0_auth/cubit/login/login_cubit.dart';
 import 'package:flutter_task/features/0_auth/cubit/login/login_state.dart';
 import 'package:flutter_task/features/0_auth/presentation/widgets/custom_text_field.dart';
 import 'package:flutter_task/features/0_auth/domain/repositories/auth_repository.dart';
+import 'package:flutter_task/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 
 class LoginPage extends StatelessWidget {
@@ -42,6 +43,7 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BlocListener<LoginCubit, LoginState>(
       listener: (context, state) {
         if (state.status == LoginStatus.failure) {
@@ -63,27 +65,20 @@ class _LoginFormState extends State<LoginForm> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'Welcome Back!',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  Text(l10n.welcomeBack, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 32),
                   CustomTextField(
                     controller: _emailController,
-                    labelText: 'Email',
+                    labelText: l10n.email,
                     icon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter an email';
+                        return l10n.pleaseEnterEmail;
                       }
-                      final emailRegExp = RegExp(
-                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                      );
+                      final emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                       if (!emailRegExp.hasMatch(value)) {
-                        return 'Please enter a valid email';
+                        return l10n.pleaseEnterValidEmail;
                       }
                       return null;
                     },
@@ -91,56 +86,47 @@ class _LoginFormState extends State<LoginForm> {
                   const SizedBox(height: 16),
                   CustomTextField(
                     controller: _passwordController,
-                    labelText: 'Password',
+                    labelText: l10n.password,
                     icon: Icons.lock_outline,
                     obscureText: true,
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a password';
+                       if (value == null || value.isEmpty) {
+                        return l10n.pleaseEnterPassword;
                       }
                       if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
+                        return l10n.passwordMinLength;
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 24),
-                  SizedBox(
-                    height: 44,
-                    child: BlocBuilder<LoginCubit, LoginState>(
-                      builder: (context, state) {
-                        return state.status == LoginStatus.loading
-                            ? ElevatedButton(
-                                onPressed: null,
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onPrimary,
-                                  ),
+                  BlocBuilder<LoginCubit, LoginState>(
+                    builder: (context, state) {
+                      return state.status == LoginStatus.loading
+                          ? const Center(child: CircularProgressIndicator())
+                          : ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                              )
-                            : ElevatedButton(
-                                onPressed: () {
-                                  if (_formKey.currentState!.validate()) {
-                                    context
-                                        .read<LoginCubit>()
-                                        .logInWithCredentials(
-                                          _emailController.text,
-                                          _passwordController.text,
-                                        );
-                                  }
-                                },
-                                child: const Text('Login'),
-                              );
-                      },
-                    ),
+                              ),
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) {
+                                  context.read<LoginCubit>().logInWithCredentials(
+                                        _emailController.text,
+                                        _passwordController.text,
+                                      );
+                                }
+                              },
+                              child: Text(l10n.login),
+                            );
+                    },
                   ),
                   const SizedBox(height: 16),
                   TextButton(
                     onPressed: () => context.go('/register'),
-                    child: const Text('Don\'t have an account? Sign Up'),
+                    child: Text(l10n.dontHaveAccount),
                   ),
                 ],
               ),

@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_task/features/0_auth/cubit/signup/signup_cubit.dart';
 import 'package:flutter_task/features/0_auth/cubit/signup/signup_state.dart';
-import 'package:flutter_task/features/0_auth/presentation/widgets/custom_text_field.dart';
 import 'package:flutter_task/features/0_auth/domain/entities/country_entity.dart';
 import 'package:flutter_task/features/0_auth/domain/repositories/auth_repository.dart';
+import 'package:flutter_task/features/0_auth/presentation/widgets/custom_text_field.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_task/l10n/app_localizations.dart';
 
 class RegistrationPage extends StatelessWidget {
   const RegistrationPage({super.key});
@@ -14,9 +15,9 @@ class RegistrationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.createAccount), centerTitle: true),
       body: BlocProvider(
-        create: (context) =>
-            SignUpCubit(context.read<AuthRepository>())..fetchCountries(),
+        create: (context) => SignUpCubit(context.read<AuthRepository>())..fetchCountries(),
         child: const SignUpForm(),
       ),
     );
@@ -53,6 +54,7 @@ class _SignUpFormState extends State<SignUpForm> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BlocListener<SignUpCubit, SignUpState>(
       listener: (context, state) {
         if (state.status == SignUpStatus.failure) {
@@ -63,8 +65,6 @@ class _SignUpFormState extends State<SignUpForm> {
             );
         }
         if (state.status == SignUpStatus.success) {
-          // On success, GoRouter will handle redirection via the AuthBloc listener
-          // But we can pop this page to go back to the login page
           if (context.canPop()) context.pop();
         }
       },
@@ -79,36 +79,25 @@ class _SignUpFormState extends State<SignUpForm> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'Create Your Account!',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
                   CustomTextField(
                     controller: _displayNameController,
-                    labelText: 'Display Name',
+                    labelText: l10n.displayName,
                     icon: Icons.person_outline,
-                    validator: (value) => (value?.isEmpty ?? true)
-                        ? 'Please enter a display name'
-                        : null,
+                    validator: (value) => (value?.isEmpty ?? true) ? l10n.pleaseEnterDisplayName : null,
                   ),
                   const SizedBox(height: 16),
                   CustomTextField(
                     controller: _emailController,
-                    labelText: 'Email',
+                    labelText: l10n.email,
                     icon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter an email';
+                        return l10n.pleaseEnterEmail;
                       }
-                      final emailRegExp = RegExp(
-                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                      );
+                      final emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                       if (!emailRegExp.hasMatch(value)) {
-                        return 'Please enter a valid email';
+                        return l10n.pleaseEnterValidEmail;
                       }
                       return null;
                     },
@@ -118,7 +107,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     builder: (context, state) {
                       return DropdownButtonFormField<CountryEntity>(
                         value: _selectedCountry,
-                        hint: const Text('Select Country'),
+                        hint: Text(l10n.selectCountry),
                         isExpanded: true,
                         items: state.countries.map((CountryEntity country) {
                           return DropdownMenuItem<CountryEntity>(
@@ -132,12 +121,9 @@ class _SignUpFormState extends State<SignUpForm> {
                             _dialCode = newValue?.dialCode ?? '';
                           });
                         },
-                        validator: (value) =>
-                            value == null ? 'Please select a country' : null,
+                        validator: (value) => value == null ? l10n.pleaseSelectCountry : null,
                         decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                           prefixIcon: const Icon(Icons.flag_outlined),
                         ),
                       );
@@ -146,85 +132,71 @@ class _SignUpFormState extends State<SignUpForm> {
                   const SizedBox(height: 16),
                   CustomTextField(
                     controller: _mobileController,
-                    labelText: 'Mobile Number',
+                    labelText: l10n.mobileNumber,
                     icon: Icons.phone_outlined,
                     prefixText: _dialCode.isNotEmpty ? '$_dialCode ' : null,
                     keyboardType: TextInputType.phone,
-                    validator: (value) => (value?.isEmpty ?? true)
-                        ? 'Please enter a mobile number'
-                        : null,
+                    validator: (value) => (value?.isEmpty ?? true) ? l10n.pleaseEnterMobile : null,
                   ),
                   const SizedBox(height: 16),
                   CustomTextField(
                     controller: _passwordController,
-                    labelText: 'Password',
+                    labelText: l10n.password,
                     icon: Icons.lock_outline,
                     obscureText: true,
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a password';
+                       if (value == null || value.isEmpty) {
+                        return l10n.pleaseEnterPassword;
                       }
                       if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
+                        return l10n.passwordMinLength;
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
                   CustomTextField(
-                    controller: _confirmPasswordController,
-                    labelText: 'Confirm Password',
-                    icon: Icons.lock_outline,
-                    obscureText: true,
-                    validator: (value) {
-                      if (value != _passwordController.text) {
-                        return 'Passwords do not match';
-                      }
-                      return null;
-                    },
-                  ),
+                      controller: _confirmPasswordController,
+                      labelText: l10n.confirmPassword,
+                      icon: Icons.lock_outline,
+                      obscureText: true,
+                      validator: (value) {
+                        if (value != _passwordController.text) {
+                          return l10n.passwordsDoNotMatch;
+                        }
+                        return null;
+                      }),
                   const SizedBox(height: 24),
-                  SizedBox(
-                    height: 44,
-                    child: BlocBuilder<SignUpCubit, SignUpState>(
-                      builder: (context, state) {
-                        final isButtonEnabled = _selectedCountry != null;
-                        return state.status == SignUpStatus.loading
-                            ? ElevatedButton(
-                                onPressed: null,
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onPrimary,
-                                  ),
+                  BlocBuilder<SignUpCubit, SignUpState>(
+                    builder: (context, state) {
+                      return state.status == SignUpStatus.loading
+                          ? const Center(child: CircularProgressIndicator())
+                          : ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                              )
-                            : ElevatedButton(
-                                onPressed: isButtonEnabled
-                                    ? () {
-                                        if (_formKey.currentState!.validate()) {
-                                          context.read<SignUpCubit>().signUp(
-                                            email: _emailController.text,
-                                            password: _passwordController.text,
-                                            displayName:
-                                                _displayNameController.text,
-                                            country: _selectedCountry!.name,
-                                            mobile:
-                                                '$_dialCode${_mobileController.text}',
-                                          );
-                                        }
-                                      }
-                                    : null,
-                                child: const Text('Sign Up'),
-                              );
-                      },
-                    ),
+                              ),
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) {
+                                  context.read<SignUpCubit>().signUp(
+                                        email: _emailController.text,
+                                        password: _passwordController.text,
+                                        displayName: _displayNameController.text,
+                                        country: _selectedCountry!.name,
+                                        mobile: '$_dialCode${_mobileController.text}',
+                                      );
+                                }
+                              },
+                              child: Text(l10n.register),
+                            );
+                    },
                   ),
                   const SizedBox(height: 16),
                   TextButton(
                     onPressed: () => context.go('/login'),
-                    child: const Text('Already have an account? Login'),
+                    child: Text(l10n.alreadyHaveAccount),
                   ),
                 ],
               ),

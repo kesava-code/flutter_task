@@ -34,4 +34,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logout => 'Logout';
+
+  @override
+  String get login => 'Login';
+
+  @override
+  String get register => 'Register';
+
+  @override
+  String get welcomeBack => 'Welcome Back!';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get dontHaveAccount => 'Don\'t have an account? Sign Up';
+
+  @override
+  String get createAccount => 'Create Account';
+
+  @override
+  String get displayName => 'Display Name';
+
+  @override
+  String get selectCountry => 'Select Country';
+
+  @override
+  String get mobileNumber => 'Mobile Number';
+
+  @override
+  String get confirmPassword => 'Confirm Password';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? Login';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get pleaseEnterEmail => 'Please enter an email';
+
+  @override
+  String get pleaseEnterValidEmail => 'Please enter a valid email';
+
+  @override
+  String get pleaseEnterPassword => 'Please enter a password';
+
+  @override
+  String get passwordMinLength => 'Password must be at least 6 characters';
+
+  @override
+  String get pleaseEnterDisplayName => 'Please enter a display name';
+
+  @override
+  String get pleaseSelectCountry => 'Please select a country';
+
+  @override
+  String get pleaseEnterMobile => 'Please enter a mobile number';
+
+  @override
+  String get noChats => 'No chats yet. Scan a QR code to start!';
+
+  @override
+  String get failedToLoadChats => 'Failed to load chats.';
+
+  @override
+  String get scanQrCode => 'Scan QR Code';
+
+  @override
+  String get selectAChat => 'Select a chat to view messages';
+
+  @override
+  String get sendMessage => 'Send a message...';
 }

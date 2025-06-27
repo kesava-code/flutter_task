@@ -15,7 +15,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_task/features/0_auth/presentation/pages/login_page.dart';
 import 'package:flutter_task/features/0_auth/presentation/pages/registration_page.dart';
 
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
+// Make the key public so it can be accessed from notification_service.dart
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
 class AppRouter {
   final AuthBloc authBloc;
@@ -25,7 +26,7 @@ class AppRouter {
 
   GoRouter get router {
     _router ??= GoRouter(
-      navigatorKey: _rootNavigatorKey,
+      navigatorKey: rootNavigatorKey,
       initialLocation: '/home',
       refreshListenable: _GoRouterRefreshStream(authBloc.stream),
       redirect: (BuildContext context, GoRouterState state) {
@@ -48,12 +49,12 @@ class AppRouter {
         ),
         GoRoute(
           path: '/settings',
-          parentNavigatorKey: _rootNavigatorKey,
+          parentNavigatorKey: rootNavigatorKey,
           builder: (context, state) => const SettingsScreen(),
         ),
         GoRoute(
           path: '/scanner',
-          parentNavigatorKey: _rootNavigatorKey,
+          parentNavigatorKey: rootNavigatorKey,
           builder: (context, state) => const QrScannerScreen(),
         ),
         StatefulShellRoute.indexedStack(
@@ -72,7 +73,8 @@ class AppRouter {
                   routes: [
                     GoRoute(
                       path: ':chatId',
-                      parentNavigatorKey: _rootNavigatorKey,
+                      name: 'chatDetail', // Give the route a name
+                      parentNavigatorKey: rootNavigatorKey,
                       builder: (context, state) {
                         final chatId = state.pathParameters['chatId']!;
                         final partnerName = state.extra as String?;

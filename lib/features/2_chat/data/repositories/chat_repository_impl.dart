@@ -18,8 +18,32 @@ class ChatRepositoryImpl implements ChatRepository {
         _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
 
   @override
+  Future<String> createChatRoom({required String partnerUid}) async {
+    final currentUser = _firebaseAuth.currentUser;
+    if (currentUser == null) {
+      throw Exception("User not logged in");
+    }
+    final currentUid = currentUser.uid;
+
+    List<String> participants = [currentUid, partnerUid];
+    participants.sort();
+    String chatRoomId = participants.join('_');
+
+    final chatRoomRef = _firestore.collection('chats').doc(chatRoomId);
+    final doc = await chatRoomRef.get();
+
+    if (!doc.exists) {
+      await chatRoomRef.set({
+        'participants': participants,
+        'lastMessage': '',
+        'lastMessageTimestamp': FieldValue.serverTimestamp(),
+      });
+    }
+    return chatRoomId;
+  }
+
+  @override
   Stream<List<ChatRoomEntity>> getChatRooms() {
-    // ... (This method remains the same)
     final currentUid = _firebaseAuth.currentUser?.uid;
     if (currentUid == null) throw Exception('User not logged in');
 
@@ -45,7 +69,7 @@ class ChatRepositoryImpl implements ChatRepository {
 
           final userDoc = await _firestore.collection('users').doc(partnerUid).get();
           if (!userDoc.exists) {
-             if (kDebugMode) {
+            if (kDebugMode) {
               print("Skipping chat room ${doc.id} because partner user $partnerUid does not exist.");
             }
             continue;
@@ -54,15 +78,26 @@ class ChatRepositoryImpl implements ChatRepository {
           final partnerName = userDoc.data()?['displayName'] ?? 'Unknown User';
           final lastTimestamp = data['lastMessageTimestamp'] as Timestamp? ?? Timestamp.now();
 
+          final unreadMessagesSnapshot = await _firestore
+              .collection('chats')
+              .doc(doc.id)
+              .collection('messages')
+              .where('senderId', isNotEqualTo: currentUid)
+              .where('status', isEqualTo: 'sent')
+              .count()
+              .get();
+          final unreadCount = unreadMessagesSnapshot.count ?? 0;
+
           chatRooms.add(ChatRoomEntity(
             id: doc.id,
             partnerName: partnerName,
             partnerUid: partnerUid,
             lastMessage: data['lastMessage'] ?? '',
             lastMessageTimestamp: lastTimestamp.toDate(),
+            unreadCount: unreadCount,
           ));
         } catch (e) {
-           if (kDebugMode) {
+          if (kDebugMode) {
             print("Error processing chat document ${doc.id}: $e");
           }
         }
@@ -73,7 +108,6 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Stream<List<MessageEntity>> getMessages(String chatRoomId) {
-    // ... (This method remains the same)
     return _firestore
         .collection('chats')
         .doc(chatRoomId)
@@ -97,7 +131,6 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Future<void> sendMessage({required String chatRoomId, required String text}) async {
-    // ... (This method remains the same)
     final currentUid = _firebaseAuth.currentUser?.uid;
     if (currentUid == null) throw Exception('User not logged in');
 
@@ -106,7 +139,7 @@ class ChatRepositoryImpl implements ChatRepository {
       'senderId': currentUid,
       'text': text,
       'timestamp': Timestamp.fromDate(now),
-      'status': 'sent', // Initial status is always 'sent'
+      'status': 'sent',
     };
 
     await _firestore.collection('chats').doc(chatRoomId).collection('messages').add(messageData);
@@ -129,42 +162,16 @@ class ChatRepositoryImpl implements ChatRepository {
         .where('status', isEqualTo: 'sent')
         .get();
 
-    if (messagesQuery.docs.isEmpty) return; // No messages to update
-
-    if (kDebugMode) {
-      print("Found ${messagesQuery.docs.length} unread messages to mark as seen.");
-    }
+    if (messagesQuery.docs.isEmpty) return;
 
     final batch = _firestore.batch();
     for (var doc in messagesQuery.docs) {
       batch.update(doc.reference, {'status': 'seen'});
     }
-    await batch.commit();
-  }
-
-  @override
-  Future<String> createChatRoom({required String partnerUid}) async {
-    // ... (This method remains the same)
-    final currentUser = _firebaseAuth.currentUser;
-    if (currentUser == null) {
-      throw Exception("User not logged in");
-    }
-    final currentUid = currentUser.uid;
-
-    List<String> participants = [currentUid, partnerUid];
-    participants.sort();
-    String chatRoomId = participants.join('_');
 
     final chatRoomRef = _firestore.collection('chats').doc(chatRoomId);
-    final doc = await chatRoomRef.get();
+    batch.update(chatRoomRef, {'lastReadTimestamp_${currentUid}': FieldValue.serverTimestamp()});
 
-    if (!doc.exists) {
-      await chatRoomRef.set({
-        'participants': participants,
-        'lastMessage': '',
-        'lastMessageTimestamp': FieldValue.serverTimestamp(),
-      });
-    }
-    return chatRoomId;
+    await batch.commit();
   }
 }

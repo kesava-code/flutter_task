@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_task/features/0_auth/bloc/auth_bloc.dart';
+import 'package:flutter_task/l10n/app_localizations.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -9,8 +10,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use the AuthBloc to get the current user's information
     final user = context.select((AuthBloc bloc) => bloc.state.user);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: Center(
@@ -18,19 +19,21 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Welcome, ${user?.displayName ?? 'User'}!',
+              '${l10n.welcome}, ${user?.displayName ?? 'User'}!',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 32),
             if (user != null)
-              QrImageView(
-                data: user.uid, // The QR code will contain the user's unique ID
-                version: QrVersions.auto,
-                size: 200.0,
-                backgroundColor: Colors.white,
+              Container(
+                color: Colors.white,
+                child: QrImageView(
+                  data: user.uid,
+                  version: QrVersions.auto,
+                  size: 200.0,
+                ),
               ),
             const SizedBox(height: 16),
-            const Text('Scan this code to connect'),
+            Text(l10n.scanThisCodeToConnect),
           ],
         ),
       ),
